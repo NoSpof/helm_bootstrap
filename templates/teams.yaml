@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tenants
+  namespace: kube-ops
+  annotations:
+    argocd.argoproj.io/sync-wave: "-50"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: kube-ops
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: "."
+    repoURL: https://github.com/NoSpof/Tenants_bootstrap
+    targetRevision: {{.Values.env}}
+    helm/
+      valueFiles:
+        - common-values.yaml
+        - {{.Values.env}}-values.yaml
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: false
